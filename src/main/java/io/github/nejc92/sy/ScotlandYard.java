@@ -15,7 +15,7 @@ import java.util.Scanner;
 
 public class ScotlandYard {
 
-    private static final int MCTS_ITERATIONS = 20000;
+    private static final int MCTS_ITERATIONS = 2000;
     private static final double HIDERS_EXPLORATION = 0.2;
     private static final double SEEKERS_EXPLORATION = 2;
     private static final int NUMBER_OF_PLAYERS = 6;
