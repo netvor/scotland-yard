@@ -3,7 +3,22 @@ package io.github.nejc92.sy.game;
 public class Action {
 
     public enum Transportation {
-        TAXI, BUS, UNDERGROUND, BLACK_FARE
+        TAXI, BUS, UNDERGROUND, BLACK_FARE;
+
+        public String toString() {
+            switch(this) {
+                case BLACK_FARE:
+                    return "loď";
+                case BUS:
+                    return "drožka";
+                case TAXI:
+                    return "taxi";
+                case UNDERGROUND:
+                    return "tramvaj";
+                default:
+                    return null;
+            }
+        }
     }
 
     private final Transportation transportation;
