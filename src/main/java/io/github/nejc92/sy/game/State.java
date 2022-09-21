@@ -42,6 +42,10 @@ public class State implements MctsDomainState<Action, Player> {
         this.searchInvokingPlayerIsHider = false;
     }
 
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
     public PlayersOnBoard getPlayersOnBoard() {
         return playersOnBoard;
     }
@@ -173,9 +177,9 @@ public class State implements MctsDomainState<Action, Player> {
     private void  performDoubleMoveIfShould() {
         if (shouldCheckForHidersDoubleMoveAutomatically()) {
             Hider hider = (Hider)getPreviousAgent();
-            if (hider.shouldUseDoubleMove(playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
+            if (hider.shouldUseDoubleMove(currentRound, playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
                 skipAllSeekers();
-                hider.removeDoubleMoveCard();
+                hider.removeDoubleMoveCard(currentRound);
             }
         }
     }
@@ -186,7 +190,7 @@ public class State implements MctsDomainState<Action, Player> {
 
     public void skipAllSeekers() {
         currentPlayerIndex--;
-        currentRound++;
+        // currentRound++;
     }
 
     @Override
@@ -207,11 +211,11 @@ public class State implements MctsDomainState<Action, Player> {
             availableActions = playersOnBoard.getAvailableActionsFromSeekersPov(currentPlayerIndex);
         else
             availableActions = playersOnBoard.getAvailableActionsForActualPosition(currentPlayerIndex);
-        availableActions = addHidersBlackFairActions(availableActions);
+        availableActions = addHidersBlackFareActions(availableActions);
         return availableActions;
     }
 
-    private List<Action> addHidersBlackFairActions(List<Action> actions) {
+    private List<Action> addHidersBlackFareActions(List<Action> actions) {
         if (currentPlayerIsHider()) {
             if (notHumanInSearch())
                 return addBlackFareActionsIfAvailableTickets(
@@ -219,8 +223,10 @@ public class State implements MctsDomainState<Action, Player> {
             else
                 return addBlackFareActionsForHiderIfOptimal(
                         (Hider) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
+        } else {
+            actions.stream().forEach(Action::disableBlackFareAction);
+            return actions;
         }
-        return actions;
     }
 
     private boolean notHumanInSearch() {
@@ -229,29 +235,18 @@ public class State implements MctsDomainState<Action, Player> {
 
     List<Action> addBlackFareActionsIfAvailableTickets(Hider hider, List<Action> actions) {
         if (hider.hasBlackFareTicket())
-            return addBlackFareActions(actions);
+            actions.stream().forEach(Action::enableBlackFareAction);
+        else
+            actions.stream().forEach(Action::disableBlackFareAction);
         return actions;
     }
 
     List<Action> addBlackFareActionsForHiderIfOptimal(Hider hider, List<Action> actions) {
         if (hider.shouldUseBlackfareTicket(currentRound, actions, searchInvokingPlayerUsesMoveFiltering))
-            return addBlackFareActions(actions);
+            actions.stream().forEach(Action::enableBlackFareAction);
+        else
+            actions.stream().forEach(Action::disableBlackFareAction);
         return actions;
-    }
-
-    private List<Action> addBlackFareActions(List<Action> actions) {
-        List<Action> blackFareActions = generateBlackfareActions(actions);
-        actions.addAll(blackFareActions);
-        return removeDuplicates(actions);
-    }
-
-    private List<Action> generateBlackfareActions(List<Action> actions) {
-        return actions.stream()
-                .map(Action::generateBlackFareAction).collect(Collectors.toList());
-    }
-
-    private List<Action> removeDuplicates(List<Action> actions) {
-        return new ArrayList<>(new LinkedHashSet<>(actions));
     }
 
     private void prepareStateForNextPlayer() {

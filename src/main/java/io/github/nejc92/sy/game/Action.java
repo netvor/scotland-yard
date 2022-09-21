@@ -23,10 +23,12 @@ public class Action {
 
     private final Transportation transportation;
     private final int destination;
+    private boolean enabled;
 
     public Action(Transportation transportation, int destination) {
         this.transportation = transportation;
         this.destination = destination;
+        this.enabled = (this.transportation != Transportation.BLACK_FARE);
     }
 
     public Transportation getTransportation() {
@@ -41,8 +43,14 @@ public class Action {
         return this.transportation == transportation;
     }
 
-    protected Action generateBlackFareAction() {
-        return new Action(Transportation.BLACK_FARE, this.destination);
+    protected void enableBlackFareAction() {
+        if (this.transportation == Transportation.BLACK_FARE)
+            this.enabled = true;
+    }
+
+    protected void disableBlackFareAction() {
+        if (this.transportation == Transportation.BLACK_FARE)
+            this.enabled = false;
     }
 
     @Override

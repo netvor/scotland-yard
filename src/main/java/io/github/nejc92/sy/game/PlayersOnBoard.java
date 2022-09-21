@@ -120,10 +120,15 @@ public class PlayersOnBoard {
 
     public void printPlayers(int start) {
         for (int i = start; i < players.length; i++) {
+            String hiderTickets = ") ";
+            if (players[i].isHider()) hiderTickets = 
+                    ", " + Action.Transportation.BLACK_FARE + " tickets: " + ((Hider)players[i]).getBlackFareTickets() +
+                    ", Double move cards: " + ((Hider)players[i]).getDoubleMoveCards() + hiderTickets;
             System.out.println(players[i] + " on " + playersActualPositions[i] +
                     " (" + Action.Transportation.TAXI + " tickets: " + players[i].getTaxiTickets() +
                     ", " + Action.Transportation.BUS + " tickets: " + players[i].getBusTickets() +
-                    ", " + Action.Transportation.UNDERGROUND + " tickets: " + players[i].getUndergroundTickets() + ") ");
+                    ", " + Action.Transportation.UNDERGROUND + " tickets: " + players[i].getUndergroundTickets() + 
+                    hiderTickets);
         }
         System.out.println();
     }

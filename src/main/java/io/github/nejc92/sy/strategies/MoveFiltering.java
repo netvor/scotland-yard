@@ -14,7 +14,7 @@ public class MoveFiltering {
         YES, NO
     }
 
-    private static final List<Integer> SHOULDNT_USE_BLACK_FAIR_ROUNDS = new ArrayList<>(
+    private static final List<Integer> SHOULDNT_USE_BLACK_FARE_ROUNDS = new ArrayList<>(
             Arrays.asList(1, 2, 3, 8, 13, 18, 24)
     );
     private static final double SHOULD_USE_DOUBLE_MOVE_AVG_DISTANCE_THRESHOLD = 3;
@@ -22,7 +22,7 @@ public class MoveFiltering {
     // private static final double SHOULD_USE_BLACK_FARE_TICKET_GREEDY_THRESHOLD = 0.3;
 
     public static boolean optimalToUseBlackFareTicket(int currentRound, List<Action> actions) {
-        return !SHOULDNT_USE_BLACK_FAIR_ROUNDS.contains(currentRound) && !actionsContainOnlyTaxis(actions);
+        return !SHOULDNT_USE_BLACK_FARE_ROUNDS.contains(currentRound) && !actionsContainOnlyTaxis(actions);
     }
 
     private static boolean actionsContainOnlyTaxis(List<Action> actions) {

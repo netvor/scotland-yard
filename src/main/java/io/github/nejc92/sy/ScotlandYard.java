@@ -24,7 +24,7 @@ public class ScotlandYard {
     private static final int HUMAN_AS_HIDER = 1;
     private static final int HUMAN_AS_SEEKERS = 2;
     private static final int TEST_PLAYERS = 3;
-    private static final int BOARD_SIZE = 199;
+    private static final int BOARD_SIZE = 202;
 
     private static Player.Type humanType;
     private static int numberOfPlayers = 0;
@@ -234,7 +234,7 @@ public class ScotlandYard {
     private static void askHumanForDoubleMove(State state, Scanner scanner) {
         if (shouldAskForDoubleMove(state)) {
             Hider hider = (Hider)state.getPreviousAgent();
-            if (hider.hasDoubleMoveCard())
+            if (hider.hasDoubleMoveCard(state.getCurrentRound()))
                 askHumanForDoubleMoveConfidently(state, hider, scanner);
         }
     }
@@ -244,7 +244,7 @@ public class ScotlandYard {
         String doubleMove = scanner.nextLine();
         if (doubleMove.equals("y")) {
             state.skipAllSeekers();
-            hider.removeDoubleMoveCard();
+            hider.removeDoubleMoveCard(state.getCurrentRound());
         }
     }
 

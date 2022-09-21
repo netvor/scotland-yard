@@ -7,26 +7,33 @@ import io.github.nejc92.sy.strategies.CoalitionReduction;
 import io.github.nejc92.sy.strategies.MoveFiltering;
 import io.github.nejc92.sy.strategies.Playouts;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Hider extends Player {
 
+    private static final int BLACK_FARE_TICKETS = 2;
+    private static final int DOUBLE_MOVE_CARDS = 2;
     private static final int TAXI_TICKETS = 4;
     private static final int BUS_TICKETS = 3;
     private static final int UNDERGROUND_TICKETS = 3;
 
     private int doubleMoveCards;
     private int blackFareTickets;
+    private Set<Integer> doubleMovesMadeInRounds;
 
     public Hider(Operator operator, String name, int startingPosition, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
                  MoveFiltering.Uses moveFiltering) {
         super(operator, Type.HIDER, name, startingPosition, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS,
                 playout, coalitionReduction, moveFiltering);
-        this.doubleMoveCards = 2;
-        this.blackFareTickets = 5;
+        this.doubleMoveCards = DOUBLE_MOVE_CARDS;
+        this.blackFareTickets = BLACK_FARE_TICKETS;
+        this.doubleMovesMadeInRounds = new HashSet<Integer>();
     }
 
-    public void removeDoubleMoveCard() {
+    public void removeDoubleMoveCard(int round) {
+        doubleMovesMadeInRounds.add(round);
         doubleMoveCards--;
     }
 
@@ -34,12 +41,20 @@ public class Hider extends Player {
         blackFareTickets--;
     }
 
-    public boolean hasDoubleMoveCard() {
-        return doubleMoveCards > 0;
+    public boolean hasDoubleMoveCard(int round) {
+        return doubleMoveCards > 0 && !doubleMovesMadeInRounds.contains(round);
+    }
+
+    public int getDoubleMoveCards() {
+        return doubleMoveCards;
     }
 
     public boolean hasBlackFareTicket() {
         return blackFareTickets > 0;
+    }
+
+    public int getBlackFareTickets() {
+        return blackFareTickets;
     }
 
     @Override
@@ -79,11 +94,11 @@ public class Hider extends Player {
             return hasBlackFareTicket() && MoveFiltering.shouldUseBlackFareTicketGreedy();
     }
 
-    public boolean shouldUseDoubleMove(PlayersOnBoard playersOnBoard,
+    public boolean shouldUseDoubleMove(int currentRound, PlayersOnBoard playersOnBoard,
                                        boolean searchInvokingPlayerUsesMoveFiltering) {
         if (searchInvokingPlayerUsesMoveFiltering)
-            return hasDoubleMoveCard() && MoveFiltering.optimalToUseDoubleMoveCard(playersOnBoard);
+            return hasDoubleMoveCard(currentRound) && MoveFiltering.optimalToUseDoubleMoveCard(playersOnBoard);
         else
-            return hasDoubleMoveCard() && MoveFiltering.shouldUseDoubleMoveCardGreedy();
+            return hasDoubleMoveCard(currentRound) && MoveFiltering.shouldUseDoubleMoveCardGreedy();
     }
 }
