@@ -13,9 +13,9 @@ public class Seeker extends Player {
     private static final int UNDERGROUND_TICKETS = 4;
     private static final double COALITION_REDUCTION_PARAMETER = 0.25;
 
-    public Seeker(Operator operator, String name, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
+    public Seeker(Operator operator, String name, int startingPosition, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
                   MoveFiltering.Uses moveFiltering) {
-        super(operator, Type.SEEKER, name, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, playout,
+        super(operator, Type.SEEKER, name, startingPosition, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, playout,
                 coalitionReduction, moveFiltering);
     }
 
