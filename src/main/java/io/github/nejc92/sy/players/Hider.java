@@ -18,9 +18,9 @@ public class Hider extends Player {
     private int doubleMoveCards;
     private int blackFareTickets;
 
-    public Hider(Operator operator, String name, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
+    public Hider(Operator operator, String name, int startingPosition, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
                  MoveFiltering.Uses moveFiltering) {
-        super(operator, Type.HIDER, name, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS,
+        super(operator, Type.HIDER, name, startingPosition, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS,
                 playout, coalitionReduction, moveFiltering);
         this.doubleMoveCards = 2;
         this.blackFareTickets = 5;

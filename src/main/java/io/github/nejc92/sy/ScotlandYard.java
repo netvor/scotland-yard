@@ -24,6 +24,7 @@ public class ScotlandYard {
     private static final int HUMAN_AS_HIDER = 1;
     private static final int HUMAN_AS_SEEKERS = 2;
     private static final int TEST_PLAYERS = 3;
+    private static final int BOARD_SIZE = 199;
 
     private static Player.Type humanType;
     private static int numberOfPlayers = 0;
@@ -39,7 +40,8 @@ public class ScotlandYard {
         playerProvider = new PlayerProvider()
             .setPlayouts(Playouts.Uses.GREEDY)
             .setCoalitionReduction(CoalitionReduction.Uses.YES)
-            .setMoveFiltering(MoveFiltering.Uses.YES);
+            .setMoveFiltering(MoveFiltering.Uses.YES)
+            .setBoardSize(BOARD_SIZE);
         setHumanPlayer(scanner);
         for (int i = 0; i < numberOfGames; i++)
             playOneGame(playerProvider, mcts, scanner);
@@ -70,16 +72,21 @@ public class ScotlandYard {
         if (selectPlayerInput == HUMAN_AS_HIDER) {
             humanType = Player.Type.HIDER;
             printHumanPlayerNameInstructions();
-            playerProvider.addPlayer(Player.Type.HIDER, Operator.HUMAN, scanner.nextLine());
+            String preferredName = scanner.nextLine();
+            printHumanPlayerLocationInstructions();
+            playerProvider.addPlayer(Player.Type.HIDER, Operator.HUMAN, preferredName, Integer.parseInt(scanner.nextLine()));
             while (++index < numberOfPlayers)
                 playerProvider.addPlayer(Player.Type.SEEKER, Operator.MCTS);
         } else if (selectPlayerInput == HUMAN_AS_SEEKERS) {
             humanType =  Player.Type.SEEKER;
-            playerProvider.addPlayer(Player.Type.HIDER, Operator.MCTS); 
             while (++index < numberOfPlayers) {
                 printHumanPlayerNameInstructions(index);
-                playerProvider.addPlayer(Player.Type.SEEKER, Operator.HUMAN, scanner.nextLine());
+                String preferredName = scanner.nextLine();
+                printHumanPlayerLocationInstructions();
+                playerProvider.addPlayer(Player.Type.SEEKER, Operator.HUMAN, preferredName, Integer.parseInt(scanner.nextLine()));
             }
+            // Hider picks their starting position last
+            playerProvider.addPlayer(Player.Type.HIDER, Operator.MCTS); 
         } else {
             humanType = null;
             while (++index < numberOfPlayers)
@@ -110,6 +117,10 @@ public class ScotlandYard {
 
     private static void printHumanPlayerNameInstructions(int index) {
         System.out.printf("Enter the name of player %d (leave blank to auto-fill):\n", index);
+    }
+
+    private static void printHumanPlayerLocationInstructions() {
+        System.out.print("Enter your starting position (use 0 for random location):\n");
     }
 
     private static void playOneGame(PlayerProvider playerProvider, Mcts<State, Action, Player> mcts, Scanner scanner) {

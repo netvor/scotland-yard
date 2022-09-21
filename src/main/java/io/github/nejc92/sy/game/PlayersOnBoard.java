@@ -13,8 +13,6 @@ public class PlayersOnBoard {
     private static final int MINIMUM_NUMBER_OF_PLAYERS = 2;
     private static final int HIDERS_INDEX = 0;
     private static final int SKIP_HIDER = 1;
-    private static final List<Integer> POSSIBLE_STARTING_POSITIONS = new ArrayList<>(
-            Arrays.asList(13, 26, 34, 50, 53, 62, 91, 94, 103, 112, 117, 132, 138, 141, 155, 174, 197, 198));
     private static final double[] DISTANCE_TO_HIDER_PROBABILITIES = {0.196, 0.671, 0.540, 0.384, 0.196};
 
     private final Board board;
@@ -27,8 +25,8 @@ public class PlayersOnBoard {
     protected static PlayersOnBoard initialize(Player[] players) {
         validatePlayers(players);
         Board board = Board.initialize();
-        int[] playersPositions = generateRandomPlayersPositions(players.length);
-        List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions);
+        int[] playersPositions = generatePlayersPositions(players);
+        List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions, board.getBoardSize());
         Collections.shuffle(hidersPossibleLocations);
         int hidersMostProbablePosition = hidersPossibleLocations.get(0);
         return new PlayersOnBoard(board, players, playersPositions, hidersPossibleLocations,
@@ -39,7 +37,7 @@ public class PlayersOnBoard {
                                                    int hidersMostProbablePosition) {
         validatePlayers(players);
         Board board = Board.initialize();
-        List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions);
+        List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions, board.getBoardSize());
         return new PlayersOnBoard(board, players, playersPositions, hidersPossibleLocations,
                 hidersMostProbablePosition);
     }
@@ -60,14 +58,12 @@ public class PlayersOnBoard {
                 && Arrays.stream(players).skip(SKIP_HIDER).allMatch(Player::isSeeker);
     }
 
-    private static int[] generateRandomPlayersPositions(int numberOfPlayers) {
-        Collections.shuffle(POSSIBLE_STARTING_POSITIONS);
-        return IntStream.range(0, numberOfPlayers)
-                .map(POSSIBLE_STARTING_POSITIONS::get).toArray();
+    private static int[] generatePlayersPositions(Player[] players) {
+        return Arrays.stream(players).mapToInt(p -> p.getStartingPosition()).toArray();
     }
 
-    private static List<Integer> calculateInitialHidersPossibleLocations(int[] playersPositions) {
-        List<Integer> hidersPossibleLocations = new ArrayList<>(POSSIBLE_STARTING_POSITIONS);
+    private static List<Integer> calculateInitialHidersPossibleLocations(int[] playersPositions, int boardSize) {
+        List<Integer> hidersPossibleLocations = IntStream.rangeClosed(1, boardSize).boxed().collect(Collectors.toCollection(ArrayList::new));
         hidersPossibleLocations.removeAll(getSeekersPositions(playersPositions));
         return hidersPossibleLocations;
     }

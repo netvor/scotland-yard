@@ -27,6 +27,7 @@ public abstract class Player implements MctsDomainAgent<State> {
     }
 
     protected final String name;
+    protected final int startingPosition;
     private final Operator operator;
     private final Type type;
     private int taxiTickets;
@@ -36,18 +37,23 @@ public abstract class Player implements MctsDomainAgent<State> {
     private final CoalitionReduction.Uses coalitionReduction;
     private final MoveFiltering.Uses moveFiltering;
 
-    protected Player(Operator operator, Type type, String name, int taxiTickets, int busTickets, int undergroundTickets,
+    protected Player(Operator operator, Type type, String name, int startingPosition, int taxiTickets, int busTickets, int undergroundTickets,
                      Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
                      MoveFiltering.Uses moveFiltering) {
         this.operator = operator;
         this.type = type;
         this.name = name;
+        this.startingPosition = startingPosition;
         this.taxiTickets = taxiTickets;
         this.busTickets = busTickets;
         this.undergroundTickets = undergroundTickets;
         this.playout = playout;
         this.coalitionReduction = coalitionReduction;
         this.moveFiltering = moveFiltering;
+    }
+
+    public int getStartingPosition() {
+        return startingPosition;
     }
 
     public int getTaxiTickets() {

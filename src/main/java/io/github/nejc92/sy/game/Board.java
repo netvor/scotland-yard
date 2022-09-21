@@ -33,6 +33,10 @@ public class Board {
         this.seekersDistances = seekersDistances;
     }
 
+    public int getBoardSize() {
+        return positionsActions.size();
+    }
+
     public List<Integer> getDestinationsForPosition(int position) {
         return getActionsForPosition(position).stream()
                 .map(Action::getDestination)
