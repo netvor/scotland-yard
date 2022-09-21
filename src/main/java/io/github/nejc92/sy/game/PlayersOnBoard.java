@@ -123,7 +123,6 @@ public class PlayersOnBoard {
     }
 
     public void printPlayers(int start) {
-        // System.out.println("Players:");
         for (int i = start; i < players.length; i++) {
             System.out.println(players[i] + " on " + playersActualPositions[i] +
                     " (" + Action.Transportation.TAXI + " tickets: " + players[i].getTaxiTickets() +

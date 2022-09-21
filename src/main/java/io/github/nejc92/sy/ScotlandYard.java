@@ -1,18 +1,20 @@
 package io.github.nejc92.sy;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+
 import io.github.nejc92.mcts.Mcts;
 import io.github.nejc92.sy.game.Action;
 import io.github.nejc92.sy.game.Board;
 import io.github.nejc92.sy.game.State;
-import io.github.nejc92.sy.players.*;
+import io.github.nejc92.sy.players.Hider;
+import io.github.nejc92.sy.players.Player;
 import io.github.nejc92.sy.players.Player.Operator;
+import io.github.nejc92.sy.players.PlayerProvider;
 import io.github.nejc92.sy.strategies.CoalitionReduction;
 import io.github.nejc92.sy.strategies.MoveFiltering;
 import io.github.nejc92.sy.strategies.Playouts;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
 
 public class ScotlandYard {
 
@@ -133,7 +135,6 @@ public class ScotlandYard {
 
     private static void printBeforeMove(State state) {
         state.printNewRound();
-        // System.out.println("\nCurrent player: " + state.getCurrentAgent() + "\n");
         if (humanType == Player.Type.HIDER)
             state.printAllPositions();
         else

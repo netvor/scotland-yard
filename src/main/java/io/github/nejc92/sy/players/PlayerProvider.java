@@ -1,15 +1,17 @@
 package io.github.nejc92.sy.players;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
-import io.github.nejc92.sy.strategies.Playouts;
-import io.github.nejc92.sy.strategies.MoveFiltering;
 import io.github.nejc92.sy.strategies.CoalitionReduction;
+import io.github.nejc92.sy.strategies.MoveFiltering;
+import io.github.nejc92.sy.strategies.Playouts;
 
 public class PlayerProvider {
-    /**
-     *
-     */
     private static final String DEFAULT_HIDER_NAME = "Fantom";
     private Stack<Player.Color> availableColors;
     private Set<String> usedNames;
@@ -34,7 +36,7 @@ public class PlayerProvider {
 
     public void addPlayer(Player.Type type, Player.Operator operator, String preferredName) throws Exception {
         String name;
-        if (preferredName == null || preferredName.trim().length() <= 0){
+        if (preferredName == null || preferredName.trim().length() <= 0) {
             if (type == Player.Type.HIDER) {
                 name = DEFAULT_HIDER_NAME;
             } else {
@@ -62,7 +64,7 @@ public class PlayerProvider {
     }
 
     public PlayerProvider setCoalitionReduction(CoalitionReduction.Uses coalitionReduction) {
-        this.coalitionReduction=coalitionReduction;
+        this.coalitionReduction = coalitionReduction;
         return this;
     }
 
@@ -75,4 +77,3 @@ public class PlayerProvider {
         return players.toArray(new Player[0]);
     }
 }
-
