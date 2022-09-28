@@ -17,6 +17,7 @@ public class MoveFiltering {
     private static final List<Integer> SHOULDNT_USE_BLACK_FARE_ROUNDS = new ArrayList<>(
             Arrays.asList(1, 2, 3, 8, 13, 18, 24)
     );
+    private static final List<Integer> SHOULDNT_USE_DOUBLE_MOVE_CARDS = SHOULDNT_USE_BLACK_FARE_ROUNDS;
     private static final double SHOULD_USE_DOUBLE_MOVE_AVG_DISTANCE_THRESHOLD = 3;
     private static final double SHOULD_USE_DOUBLE_MOVE_GREEDY_THRESHOLD = 0.3;
     // private static final double SHOULD_USE_BLACK_FARE_TICKET_GREEDY_THRESHOLD = 0.3;
@@ -29,9 +30,9 @@ public class MoveFiltering {
         return actions.stream().allMatch(action -> action.isTransportationAction(Action.Transportation.TAXI));
     }
 
-    public static boolean optimalToUseDoubleMoveCard(PlayersOnBoard playersOnBoard) {
-        return playersOnBoard.hidersAverageDistanceToSeekers(Player.Type.SEEKER)
-                <= SHOULD_USE_DOUBLE_MOVE_AVG_DISTANCE_THRESHOLD;
+    public static boolean optimalToUseDoubleMoveCard(int currentRound, PlayersOnBoard playersOnBoard) {
+        return !SHOULDNT_USE_DOUBLE_MOVE_CARDS.contains(currentRound) &&
+            (playersOnBoard.hidersAverageDistanceToSeekers(Player.Type.SEEKER) <= SHOULD_USE_DOUBLE_MOVE_AVG_DISTANCE_THRESHOLD);
     }
 
     public static boolean shouldUseDoubleMoveCardGreedy() {
@@ -39,7 +40,7 @@ public class MoveFiltering {
     }
 
     public static boolean shouldUseBlackFareTicketGreedy() {
-        // todo: fix getAvailableActions() first
+        // TODO: fix getAvailableActions() first
         // return Math.random() < SHOULD_USE_BLACK_FARE_TICKET_GREEDY_THRESHOLD;
         return true;
     }

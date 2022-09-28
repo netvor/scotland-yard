@@ -7,21 +7,18 @@ import io.github.nejc92.sy.strategies.CoalitionReduction;
 import io.github.nejc92.sy.strategies.MoveFiltering;
 import io.github.nejc92.sy.strategies.Playouts;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Hider extends Player {
 
     private static final int BLACK_FARE_TICKETS = 2;
     private static final int DOUBLE_MOVE_CARDS = 2;
-    private static final int TAXI_TICKETS = 4;
-    private static final int BUS_TICKETS = 3;
+    private static final int TAXI_TICKETS = 3;
+    private static final int BUS_TICKETS = 4;
     private static final int UNDERGROUND_TICKETS = 3;
 
     private int doubleMoveCards;
     private int blackFareTickets;
-    private Set<Integer> doubleMovesMadeInRounds;
 
     public Hider(Operator operator, String name, int startingPosition, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
                  MoveFiltering.Uses moveFiltering) {
@@ -29,11 +26,9 @@ public class Hider extends Player {
                 playout, coalitionReduction, moveFiltering);
         this.doubleMoveCards = DOUBLE_MOVE_CARDS;
         this.blackFareTickets = BLACK_FARE_TICKETS;
-        this.doubleMovesMadeInRounds = new HashSet<Integer>();
     }
 
-    public void removeDoubleMoveCard(int round) {
-        doubleMovesMadeInRounds.add(round);
+    public void removeDoubleMoveCard() {
         doubleMoveCards--;
     }
 
@@ -41,8 +36,8 @@ public class Hider extends Player {
         blackFareTickets--;
     }
 
-    public boolean hasDoubleMoveCard(int round) {
-        return doubleMoveCards > 0 && !doubleMovesMadeInRounds.contains(round);
+    public boolean hasDoubleMoveCard() {
+        return doubleMoveCards > 0;
     }
 
     public int getDoubleMoveCards() {
@@ -97,8 +92,17 @@ public class Hider extends Player {
     public boolean shouldUseDoubleMove(int currentRound, PlayersOnBoard playersOnBoard,
                                        boolean searchInvokingPlayerUsesMoveFiltering) {
         if (searchInvokingPlayerUsesMoveFiltering)
-            return hasDoubleMoveCard(currentRound) && MoveFiltering.optimalToUseDoubleMoveCard(playersOnBoard);
+            return hasDoubleMoveCard() && MoveFiltering.optimalToUseDoubleMoveCard(currentRound, playersOnBoard);
         else
-            return hasDoubleMoveCard(currentRound) && MoveFiltering.shouldUseDoubleMoveCardGreedy();
+            return hasDoubleMoveCard() && MoveFiltering.shouldUseDoubleMoveCardGreedy();
+    }
+
+    @Override
+    protected void reset() {
+        busTickets = BUS_TICKETS;
+        taxiTickets = TAXI_TICKETS;
+        undergroundTickets = UNDERGROUND_TICKETS;
+        blackFareTickets = BLACK_FARE_TICKETS;
+        doubleMoveCards = DOUBLE_MOVE_CARDS;
     }
 }

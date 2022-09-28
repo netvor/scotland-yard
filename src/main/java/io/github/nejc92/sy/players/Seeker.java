@@ -8,9 +8,9 @@ import io.github.nejc92.sy.strategies.Playouts;
 
 public class Seeker extends Player {
 
-    private static final int TAXI_TICKETS = 10;
-    private static final int BUS_TICKETS = 8;
-    private static final int UNDERGROUND_TICKETS = 4;
+    private static final int TAXI_TICKETS = 9;
+    private static final int BUS_TICKETS = 10;
+    private static final int UNDERGROUND_TICKETS = 5;
     private static final double COALITION_REDUCTION_PARAMETER = 0.25;
 
     public Seeker(Operator operator, String name, int startingPosition, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
@@ -44,15 +44,14 @@ public class Seeker extends Player {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Seeker seeker = (Seeker) o;
-        return this.name.equals(seeker.name);
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 
     @Override
-    public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+    protected void reset() {
+        busTickets = BUS_TICKETS;
+        taxiTickets = TAXI_TICKETS;
+        undergroundTickets = UNDERGROUND_TICKETS;
     }
 }

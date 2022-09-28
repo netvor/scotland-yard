@@ -1,6 +1,6 @@
 package io.github.nejc92.sy.game;
 
-public class Action {
+public class Action implements Comparable<Action> {
 
     public enum Transportation {
         TAXI, BUS, UNDERGROUND, BLACK_FARE;
@@ -23,12 +23,9 @@ public class Action {
 
     private final Transportation transportation;
     private final int destination;
-    private boolean enabled;
-
     public Action(Transportation transportation, int destination) {
         this.transportation = transportation;
         this.destination = destination;
-        this.enabled = (this.transportation != Transportation.BLACK_FARE);
     }
 
     public Transportation getTransportation() {
@@ -41,16 +38,6 @@ public class Action {
 
     public boolean isTransportationAction(Transportation transportation) {
         return this.transportation == transportation;
-    }
-
-    protected void enableBlackFareAction() {
-        if (this.transportation == Transportation.BLACK_FARE)
-            this.enabled = true;
-    }
-
-    protected void disableBlackFareAction() {
-        if (this.transportation == Transportation.BLACK_FARE)
-            this.enabled = false;
     }
 
     @Override
@@ -73,5 +60,19 @@ public class Action {
     @Override
     public String toString() {
         return transportation + " to " + destination;
+    }
+
+    @Override
+    public int compareTo(Action arg0) {
+        if (arg0.equals(this))
+            return 0;
+        else if (arg0.getDestination() > destination)
+            return -1;
+        else if (arg0.getDestination() < destination)
+            return 1;
+        else if (arg0.getTransportation().ordinal() > transportation.ordinal())
+            return -1;
+        else
+            return 1;
     }
 }

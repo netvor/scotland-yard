@@ -6,7 +6,6 @@ import io.github.nejc92.sy.players.Player;
 import io.github.nejc92.sy.players.Seeker;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class State implements MctsDomainState<Action, Player> {
 
@@ -16,6 +15,7 @@ public class State implements MctsDomainState<Action, Player> {
     private static final int ONLY_SEEKERS = 1;
 
     private final PlayersOnBoard playersOnBoard;
+    private final StateHistory stateHistory;
     private final int numberOfPlayers;
     private int currentRound;
     private int currentPlayerIndex;
@@ -28,11 +28,13 @@ public class State implements MctsDomainState<Action, Player> {
 
     public static State initialize(Player[] players) {
         PlayersOnBoard playersOnBoard = PlayersOnBoard.initialize(players);
-        return new State(playersOnBoard, players.length);
+        StateHistory stateHistory = StateHistory.initialize(players);
+        return new State(playersOnBoard, stateHistory, players.length);
     }
 
-    private State(PlayersOnBoard playersOnBoard, int numberOfPlayers) {
+    private State(PlayersOnBoard playersOnBoard, StateHistory stateHistory, int numberOfPlayers) {
         this.playersOnBoard = playersOnBoard;
+        this.stateHistory = stateHistory;
         this.numberOfPlayers = numberOfPlayers;
         this.currentRound = 1;
         this.currentPlayerIndex = 0;
@@ -48,6 +50,14 @@ public class State implements MctsDomainState<Action, Player> {
 
     public PlayersOnBoard getPlayersOnBoard() {
         return playersOnBoard;
+    }
+
+    public StateHistory getStateHistory() {
+        return stateHistory;
+    }
+
+    public int getPreviousPlayerIndex() {
+        return previousPlayerIndex;
     }
 
     @Override
@@ -102,8 +112,10 @@ public class State implements MctsDomainState<Action, Player> {
     public void printNewRound() {
         if (currentPlayerIsHider()) {
             System.out.println("ROUND: " + currentRound);
-            if (isHiderSurfacesRound())
+            if (isHiderSurfacesRound()) {
+                stateHistory.recordHiderSurfaces(currentRound);
                 System.out.println("HIDER SURFACES!");
+            }
             System.out.println("----------");
         }
     }
@@ -125,7 +137,7 @@ public class State implements MctsDomainState<Action, Player> {
     }
 
     public boolean hiderWon() {
-        return currentRound == MAX_NUMBER_OF_ROUNDS;
+        return currentRound == MAX_NUMBER_OF_ROUNDS + 1;
     }
 
     public boolean seekerWon(Seeker seeker) {
@@ -136,7 +148,7 @@ public class State implements MctsDomainState<Action, Player> {
     }
 
     @Override
-    public MctsDomainState performActionForCurrentAgent(Action action) {
+    public MctsDomainState<Action,Player> performActionForCurrentAgent(Action action) {
         validateIsAvailableAction(action);
         if (inSearchFromSeekersPov())
             playersOnBoard.movePlayerFromSeekersPov(currentPlayerIndex, action);
@@ -145,6 +157,8 @@ public class State implements MctsDomainState<Action, Player> {
         if (currentPlayerIsHider())
             lastHidersTransportation = action.getTransportation();
         setHidersMostProbablePosition(lastHidersTransportation);
+        if (!inSearch)
+            stateHistory.recordMove(currentRound, currentPlayerIndex, action);
         prepareStateForNextPlayer();
         performDoubleMoveIfShould();
         return this;
@@ -174,12 +188,13 @@ public class State implements MctsDomainState<Action, Player> {
             playersOnBoard.recalculateHidersMostProbablePosition(transportation);
     }
 
-    private void  performDoubleMoveIfShould() {
+    private void performDoubleMoveIfShould() {
         if (shouldCheckForHidersDoubleMoveAutomatically()) {
-            Hider hider = (Hider)getPreviousAgent();
-            if (hider.shouldUseDoubleMove(currentRound, playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
+            Hider hider = (Hider) getPreviousAgent();
+            if (!stateHistory.doubleMoveAvailable(currentRound, previousPlayerIndex)
+                    && hider.shouldUseDoubleMove(currentRound, playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
                 skipAllSeekers();
-                hider.removeDoubleMoveCard(currentRound);
+                hider.removeDoubleMoveCard();
             }
         }
     }
@@ -194,7 +209,7 @@ public class State implements MctsDomainState<Action, Player> {
     }
 
     @Override
-    public MctsDomainState skipCurrentAgent() {
+    public MctsDomainState<Action,Player> skipCurrentAgent() {
         prepareStateForNextPlayer();
         return this;
     }
@@ -211,42 +226,11 @@ public class State implements MctsDomainState<Action, Player> {
             availableActions = playersOnBoard.getAvailableActionsFromSeekersPov(currentPlayerIndex);
         else
             availableActions = playersOnBoard.getAvailableActionsForActualPosition(currentPlayerIndex);
-        availableActions = addHidersBlackFareActions(availableActions);
         return availableActions;
-    }
-
-    private List<Action> addHidersBlackFareActions(List<Action> actions) {
-        if (currentPlayerIsHider()) {
-            if (notHumanInSearch())
-                return addBlackFareActionsIfAvailableTickets(
-                        (Hider) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
-            else
-                return addBlackFareActionsForHiderIfOptimal(
-                        (Hider) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
-        } else {
-            actions.stream().forEach(Action::disableBlackFareAction);
-            return actions;
-        }
     }
 
     private boolean notHumanInSearch() {
         return currentPlayerIsHuman() && !inSearch;
-    }
-
-    List<Action> addBlackFareActionsIfAvailableTickets(Hider hider, List<Action> actions) {
-        if (hider.hasBlackFareTicket())
-            actions.stream().forEach(Action::enableBlackFareAction);
-        else
-            actions.stream().forEach(Action::disableBlackFareAction);
-        return actions;
-    }
-
-    List<Action> addBlackFareActionsForHiderIfOptimal(Hider hider, List<Action> actions) {
-        if (hider.shouldUseBlackfareTicket(currentRound, actions, searchInvokingPlayerUsesMoveFiltering))
-            actions.stream().forEach(Action::enableBlackFareAction);
-        else
-            actions.stream().forEach(Action::disableBlackFareAction);
-        return actions;
     }
 
     private void prepareStateForNextPlayer() {

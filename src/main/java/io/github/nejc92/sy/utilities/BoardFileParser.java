@@ -10,6 +10,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BoardFileParser extends DefaultHandler {
@@ -71,9 +72,10 @@ public class BoardFileParser extends DefaultHandler {
 
     @Override
     public void endElement(String uri, String localName, String elementName) throws SAXException {
-        if (elementName.equalsIgnoreCase("boardPosition"))
+        if (elementName.equalsIgnoreCase("boardPosition")) {
+            Collections.sort(temporaryPosition);
             boardPositions.add(temporaryPosition);
-        else if (elementName.equalsIgnoreCase("action")) {
+        } else if (elementName.equalsIgnoreCase("action")) {
             Action temporaryAction = new Action(temporaryTransportation, temporaryDestination);
             temporaryPosition.add(temporaryAction);
         }

@@ -30,9 +30,9 @@ public abstract class Player implements MctsDomainAgent<State> {
     protected final int startingPosition;
     private final Operator operator;
     private final Type type;
-    private int taxiTickets;
-    private int busTickets;
-    private int undergroundTickets;
+    protected int taxiTickets;
+    protected int busTickets;
+    protected int undergroundTickets;
     private final Playouts.Uses playout;
     private final CoalitionReduction.Uses coalitionReduction;
     private final MoveFiltering.Uses moveFiltering;
@@ -50,6 +50,14 @@ public abstract class Player implements MctsDomainAgent<State> {
         this.playout = playout;
         this.coalitionReduction = coalitionReduction;
         this.moveFiltering = moveFiltering;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getStartingPosition() {
@@ -173,9 +181,19 @@ public abstract class Player implements MctsDomainAgent<State> {
 
     protected abstract Action getActionForSeekerFromStatesAvailableActionsForSimulation(State state);
 
+    protected abstract void reset();
+
     @Override
     public String toString() {
         
         return String.format("%s '%s'", type.toString(), name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player seeker = (Player) o;
+        return this.name.equals(seeker.name);
     }
 }

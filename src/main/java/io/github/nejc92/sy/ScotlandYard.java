@@ -18,7 +18,7 @@ import io.github.nejc92.sy.strategies.Playouts;
 
 public class ScotlandYard {
 
-    private static final int MCTS_ITERATIONS = 2000;
+    private static final int MCTS_ITERATIONS = 16;
     private static final double HIDERS_EXPLORATION = 0.2;
     private static final double SEEKERS_EXPLORATION = 2;
     private static final int HUMAN_AS_HIDER = 1;
@@ -65,16 +65,16 @@ public class ScotlandYard {
 
     private static void setHumanPlayer(Scanner scanner) throws Exception {
         printSelectPlayerInstructions();
-        int selectPlayerInput = Integer.parseInt(scanner.nextLine());
+        int selectPlayerInput = getHumanInputAsInt(scanner);
         printSelectNumberOfPlayersInstructions();
-        numberOfPlayers = Integer.parseInt(scanner.nextLine());
+        numberOfPlayers = getHumanInputAsInt(scanner);
         int index = 0;
         if (selectPlayerInput == HUMAN_AS_HIDER) {
             humanType = Player.Type.HIDER;
             printHumanPlayerNameInstructions();
             String preferredName = scanner.nextLine();
             printHumanPlayerLocationInstructions();
-            playerProvider.addPlayer(Player.Type.HIDER, Operator.HUMAN, preferredName, Integer.parseInt(scanner.nextLine()));
+            playerProvider.addPlayer(Player.Type.HIDER, Operator.HUMAN, preferredName, getHumanInputAsInt(scanner));
             while (++index < numberOfPlayers)
                 playerProvider.addPlayer(Player.Type.SEEKER, Operator.MCTS);
         } else if (selectPlayerInput == HUMAN_AS_SEEKERS) {
@@ -83,17 +83,27 @@ public class ScotlandYard {
                 printHumanPlayerNameInstructions(index);
                 String preferredName = scanner.nextLine();
                 printHumanPlayerLocationInstructions();
-                playerProvider.addPlayer(Player.Type.SEEKER, Operator.HUMAN, preferredName, Integer.parseInt(scanner.nextLine()));
+                playerProvider.addPlayer(Player.Type.SEEKER, Operator.HUMAN, preferredName, getHumanInputAsInt(scanner));
             }
             // Hider picks their starting position last
             playerProvider.addPlayer(Player.Type.HIDER, Operator.MCTS); 
         } else {
             humanType = null;
-            while (++index < numberOfPlayers)
+            while (++index <= numberOfPlayers)
                 playerProvider.addPlayer( index==1 ? Player.Type.HIDER : Player.Type.SEEKER
                     , Operator.MCTS);
             printSelectNumberOfGamesInstructions();
-            numberOfGames = Integer.parseInt(scanner.nextLine());
+            numberOfGames = getHumanInputAsInt(scanner);
+        }
+    }
+
+    private static int getHumanInputAsInt(Scanner scanner) {
+        while(true) {
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch(NumberFormatException e) {
+                continue; // We keep trying until we get a valid int
+            }
         }
     }
 
@@ -166,9 +176,15 @@ public class ScotlandYard {
     }
 
     private static Action getActionFromInput(State state, Scanner scanner) {
-        printInputActionInstructions(state);
-        int actionIndex = Integer.parseInt(scanner.nextLine());
-        return state.getAvailableActionsForCurrentAgent().get(actionIndex);
+        while (true) {
+            printInputActionInstructions(state);
+            try {
+                int actionIndex = getHumanInputAsInt(scanner);
+                return state.getAvailableActionsForCurrentAgent().get(actionIndex);
+            } catch (IndexOutOfBoundsException e) {
+                continue; // ask the user to try again
+            }
+        }
     }
 
     private static void printInputActionInstructions(State state) {
@@ -233,8 +249,9 @@ public class ScotlandYard {
 
     private static void askHumanForDoubleMove(State state, Scanner scanner) {
         if (shouldAskForDoubleMove(state)) {
-            Hider hider = (Hider)state.getPreviousAgent();
-            if (hider.hasDoubleMoveCard(state.getCurrentRound()))
+            Hider hider = (Hider) state.getPreviousAgent();
+            if (state.getStateHistory().doubleMoveAvailable(state.getCurrentRound(), state.getPreviousPlayerIndex())
+                    && hider.hasDoubleMoveCard())
                 askHumanForDoubleMoveConfidently(state, hider, scanner);
         }
     }
@@ -244,7 +261,7 @@ public class ScotlandYard {
         String doubleMove = scanner.nextLine();
         if (doubleMove.equals("y")) {
             state.skipAllSeekers();
-            hider.removeDoubleMoveCard(state.getCurrentRound());
+            hider.removeDoubleMoveCard();
         }
     }
 
@@ -255,12 +272,14 @@ public class ScotlandYard {
     private static void saveAndPrintResult(State state) {
         if (state.seekersWon()) {
             numberOfSeekersWins++;
-            System.out.println("Seekers won!");
+            System.out.printf("Seekers won in round %d!\n",state.getCurrentRound()-1);
         }
         else {
             numberOfHidersWins++;
-            System.out.println("Hider won!");
+            System.out.printf("Hider won in round %d!\n",state.getCurrentRound()-1);
         }
+        if (shouldPrintGameStateInfo())
+            state.getStateHistory().printStateHistory(state.getCurrentRound()-1);
         state.printAllPositions();
     }
 }

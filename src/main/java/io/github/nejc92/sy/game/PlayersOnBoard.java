@@ -264,7 +264,7 @@ public class PlayersOnBoard {
     }
 
     protected void removeCurrentSeekersPositionFromPossibleHidersPositions(int playerIndex) {
-        hidersPossiblePositions.remove(new Integer(playersActualPositions[playerIndex]));
+        hidersPossiblePositions.remove(Integer.valueOf(playersActualPositions[playerIndex]));
         hidersMostProbablePositionPreviousRound = hidersMostProbablePosition;
         hidersMostProbablePosition = getMostProbableHidersPosition();
     }

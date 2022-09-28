@@ -107,6 +107,7 @@ public class PlayerProvider {
     }
 
     public Player[] initializePlayers() {
+        players.stream().forEach(p -> p.reset());
         return players.toArray(new Player[0]);
     }
 }
